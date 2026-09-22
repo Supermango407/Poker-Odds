@@ -73,33 +73,78 @@ def get_straight(hand):
 
 
 def get_best_hand(hands:list):
-    """returns index of the best hand from a list of hands"""
-    flushes = [get_flush(hand) for hand in hands]
+    """returns indices of the best hands from a list of hands"""
     straights = [get_straight(hand) for hand in hands]
+    flushes = [get_flush(hand) for hand in hands]
+
+    pairs = []
+    trips = []
+    fours = []
+    for hand in hands:
+        multiples = get_multiples(hand)
+        pairs.append(multiples[2])
+        trips.append(multiples[3])
+        fours.append(multiples[4])
+
+    top_hands = []
+    current_highest =  None
+
+    # check for straight flushes
+    # for i, flush in enumerate(flushes):
+    #     if flush:
+    #         straight_flush = get_straight(flush)
+    #         if straight_flush:
+    #             if current_highest is None or rank_values[straight_flush] > current_highest:
+    #                 top_hands = [i]
+    #                 current_highest = rank_values[straight_flush]
+    #             elif rank_values[straight_flush] == current_highest:
+                    # top_hands.append(i)
+
+    if top_hands:
+        return top_hands
+
+
+    # check for four of a kinds
+    # for i, four in enumerate(fours):
+    #     if four:
+    #         four_rank = four[0][0][0]
+    #         if current_highest is None or rank_values[four_rank] > current_highest:
+    #             top_hands = [i]
+    #             current_highest = rank_values[four_rank]
+    #         elif rank_values[four_rank] == current_highest:
+    #             top_hands.append(i)
+
+    # TODO check full house
+
+    if top_hands:
+        return top_hands
 
 
 hands = [
     ["5S", "KC", "5C", "KD", "TC", "QS", "2S"], # 0
     ["3S", "9S", "2C", "AS", "KS", "KC", "5S"], # 1
     ["TS", "6C", "7C", "TC", "9H", "KC", "8C"], # 2
-    ["JH", "9H", "8H", "QH", "TH", "QS", "4D"], # 3
-    ["JS", "TS", "5C", "7H", "JD", "5S", "TC"], # 4
-    ["8H", "4S", "6S", "8H", "6H", "8C", "5S"], # 5
-    ["JD", "AD", "2D", "TD", "QD", "KD", "TS"], # 6
-    ["TS", "2H", "3C", "TC", "5C", "TH", "KH"], # 7
-    ["7H", "QD", "7D", "AC", "7S", "9H", "7C"], # 8
-    ["3D", "6D", "4D", "QH", "QD", "7D", "5D"], # 9
-    ["3S", "TS", "5S", "AS", "JS", "8S", "7S"], # 10
-    ["AC", "4D", "3S", "2S", "AD", "TS", "5S"], # 11
-    ["3D", "AC", "5C", "6S", "7D", "2S", "4S"] ,# 12
-    ["3D", "AC", "5C", "6S", "7D", "2S", "4S"] ,# 13
-    ["AS", "KD", "3C", "5C", "2C", "3D", "4C"] ,# 14
+    ["7D", "3C", "4D", "5D", "6D", "8D", "9C"], # 3
+    ["JH", "9H", "8H", "QH", "TH", "QS", "4D"], # 4
+    ["JS", "TS", "5C", "7H", "JD", "5S", "TC"], # 5
+    ["8H", "4S", "6S", "8H", "6H", "8C", "5S"], # 6
+    ["JD", "AD", "2D", "TD", "QD", "KD", "TS"], # 7
+    ["TS", "2H", "3C", "TC", "5C", "TH", "KH"], # 8
+    ["7H", "QD", "7D", "AC", "7S", "9H", "7C"], # 9
+    ["3D", "6D", "4D", "QH", "QD", "7D", "5D"], # 10
+    ["3S", "TS", "5S", "AS", "JS", "8S", "7S"], # 11
+    ["AC", "4D", "3S", "2S", "AD", "TS", "5S"], # 12
+    ["3D", "AC", "5C", "6S", "7D", "2S", "4S"], # 13
+    ["3D", "AC", "5C", "6S", "7D", "2S", "4S"], # 14
+    ["AS", "KD", "3C", "5C", "2C", "3D", "4C"], # 15
+    ["6H", "3C", "TH", "5C", "2C", "4C", "AC"], # 16
+    ["AH", "TH", "QH", "JH", "AD", "KH", "AD"], # 17
 ]
 
-for i, hand in enumerate(hands):
-    print(f"Hand {i}: {get_straight(hand)}")
+# for i, hand in enumerate(hands):
+#     print(f"Hand {i}: {get_straight(hand)}")
 
-# print(get_best_hand([hands[0], hands[1]]))
+print(get_best_hand(hands))
 
 # def return_winner(hole1, hole2, board):
 #     """calculates the winner between two hands given their hole cards and the board cards"""
