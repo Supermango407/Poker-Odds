@@ -1,4 +1,5 @@
 import mysql.connector
+import help
 
 mydb = mysql.connector.connect(
     host="localhost",
@@ -8,19 +9,9 @@ mydb = mysql.connector.connect(
 )
 cursor = mydb.cursor(buffered=True)
 
-
-cards = []
-ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
-suits = ["S", "H", "D", "C"]
-
-for rank in ranks:
-    for suit in suits:
-        cards.append((rank, suit))
-
-
 def fill_cards():
     # Fill the cards table with all 52 cards
-    for card in cards:
+    for card in help.cards:
         rank, suit = card
         cursor.execute(f"INSERT INTO `cards` (`id`, `rank`, `suit`) VALUES (NULL, '{rank}', '{suit}');")
 
@@ -28,10 +19,10 @@ def fill_cards():
 def fill_holes():
     # Fill the holes table with all 1,326 possible hole card combinations (including suited and offsuit)
 
-    for i in range(len(cards)):
-        for j in range(i + 1, len(cards)):
-            card1 = cards[i]
-            card2 = cards[j]
+    for i in range(len(help.cards)):
+        for j in range(i + 1, len(help.cards)):
+            card1 = help.cards[i]
+            card2 = help.cards[j]
             rank1, suit1 = card1
             rank2, suit2 = card2
 
