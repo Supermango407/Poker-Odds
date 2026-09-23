@@ -34,9 +34,9 @@ def get_multiples(hand):
             four_of_a_kind.append(cards)
 
     return {
-        2: pairs,
-        3: three_of_a_kind,
-        4: four_of_a_kind
+        2: sorted(pairs, key=lambda pair: rank_values[pair[0][0]], reverse=True),
+        3: sorted(three_of_a_kind, key=lambda pair: rank_values[pair[0][0]], reverse=True),
+        4: sorted(four_of_a_kind, key=lambda pair: rank_values[pair[0][0]], reverse=True)
     }
 
 
@@ -85,6 +85,10 @@ def get_best_hand(hands:list):
         pairs.append(multiples[2])
         trips.append(multiples[3])
         fours.append(multiples[4])
+        print(f"2: {multiples[2]}")
+        print(f"3: {multiples[3]}")
+        print(f"4: {multiples[4]}")
+        print()
 
     top_hands = []
     current_highest =  None
@@ -114,10 +118,20 @@ def get_best_hand(hands:list):
     #         elif rank_values[four_rank] == current_highest:
     #             top_hands.append(i)
 
-    # TODO check full house
+    # check for full houses
+    # for i in range(len(hands)):
+    #     if trips[i] and pairs[i]:
+    #         trip_rank = trips[i][0][0][0]
+    #         pair_rank = pairs[i][0][0][0]
+    #         if current_highest is None or (rank_values[trip_rank], rank_values[pair_rank]) > current_highest:
+    #             top_hands = [i]
+    #             current_highest = (rank_values[trip_rank], rank_values[pair_rank])
+    #         elif (rank_values[trip_rank], rank_values[pair_rank]) == current_highest:
+    #             top_hands.append(i)
 
     if top_hands:
         return top_hands
+
 
 
 hands = [
@@ -139,6 +153,9 @@ hands = [
     ["AS", "KD", "3C", "5C", "2C", "3D", "4C"], # 15
     ["6H", "3C", "TH", "5C", "2C", "4C", "AC"], # 16
     ["AH", "TH", "QH", "JH", "AD", "KH", "AD"], # 17
+    ["TS", "JS", "9C", "AH", "AS", "TH", "AC"], # 18
+    ["TC", "AD", "AS", "JD", "8S", "TD", "TC"], # 19
+    ["5H", "KD", "8C", "5C", "8D", "KH", "7D"], # 20
 ]
 
 # for i, hand in enumerate(hands):
