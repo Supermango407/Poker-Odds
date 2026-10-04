@@ -5,7 +5,7 @@ rank_values = {rank: index for index, rank in enumerate(ranks)}
 
 for rank in ranks:
     for suit in suits:
-        cards.append((rank, suit))
+        cards.append(rank+suit)
 
 
 def get_multiples(hand, is_sorted=False):
@@ -308,12 +308,12 @@ def get_winners(holes, board, print_hands=False):
 
 # print(get_best_hand(hands))
 
-holes = [
-    ["9S", "9C"], # 0
-    ["9D", "9H"], # 1
-]
+# holes = [
+#     ["9S", "9C"], # 0
+#     ["9D", "9H"], # 1
+# ]
 
-board = ["5C", "KD", "TC", "QS", "2S"]
+# board = ["5C", "KD", "TC", "QS", "2S"]
 
-get_winners(holes, board, True)
+# get_winners(holes, board, True)
 
