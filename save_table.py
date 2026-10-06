@@ -54,14 +54,15 @@ with open(input_file, mode='r', newline='') as file:
         seperation = high_card-low_card
         if high_card == 12: # A
             seperation = min(seperation, low_card+1)
+        
         if seperation < 5:
-            connected = 5-seperation
+            connection = 5-seperation
         else:
-            connected = 0
+            connection = 0
 
         id = get_id(high_card, low_card, modifier)
 
-        sql = f"INSERT INTO `2_player_holes` (`id`, `name`, `high_card`, `low_card`, `modifier`, `separation`, `win`, `lose`, `draw`) VALUES ({id}, '{hole_name}', {high_card}, {low_card}, '{modifier}', '{seperation}', {win_percent}, '{lose_percent}', '{draw_percent}');"
+        sql = f"INSERT INTO `2_player_holes` (`id`, `name`, `high_card`, `low_card`, `modifier`, `connection`, `win`, `lose`, `draw`) VALUES ({id}, '{hole_name}', {high_card}, {low_card}, '{modifier}', {connection}, {win_percent}, '{lose_percent}', '{draw_percent}');"
         # print(sql)
         cursor.execute(sql)
         mydb.commit()
