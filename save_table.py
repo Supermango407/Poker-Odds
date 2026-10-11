@@ -10,7 +10,14 @@ mydb = mysql.connector.connect(
 )
 cursor = mydb.cursor(buffered=True)
 
-input_file = "hole_odds/hole_odds_2.csv"
+table_name = "4_player_holes"
+input_file = "hole_odds/4_hole_odds.csv"
+row_numbers = {
+    "name": 0,
+    "win_percent": 1,
+    "draw_percent": None,
+}
+high_card_second = False
 
 
 def get_id(high_card, low_card, modifier):
@@ -23,6 +30,7 @@ def get_id(high_card, low_card, modifier):
             modifier_start = 78
 
         row_start = high_card*(high_card-1)/2 + 1
+        # print(f"id:{modifier_start+row_start+low_card}, row:{row_start}, top:{high_card}, low:{low_card}, mod:{modifier}")
         return modifier_start+row_start+low_card
 
 
@@ -30,14 +38,16 @@ with open(input_file, mode='r', newline='') as file:
     reader = csv.reader(file)
 
     for i, input_row in enumerate(reader):
+        if i == 0:
+            continue
         hole_name = ""
         modifier = "" # s:suited, u:unsuited, p:pair.
 
-        win_percent = float(input_row[1])
-        lose_percent = float(input_row[2])
-        draw_percent = float(input_row[3])
+        win_percent = float(input_row[row_numbers["win_percent"]])
+        if not row_numbers["draw_percent"] is None:
+            win_percent += float(input_row[row_numbers["draw_percent"]])
 
-        name_split = input_row[0].split(" ")
+        name_split = input_row[row_numbers["name"]].split(" ")
         
         if name_split[0] == "Pair":
             hole_name = f"{name_split[2][0]*2}"
@@ -49,8 +59,12 @@ with open(input_file, mode='r', newline='') as file:
             else:
                 modifier = 'u'
 
-        high_card = help.rank_values[hole_name[1]]
-        low_card = help.rank_values[hole_name[0]]
+        high_card = help.rank_values[hole_name[0]]
+        low_card = help.rank_values[hole_name[1]]
+
+        if high_card_second:
+            low_card, high_card = high_card, low_card
+
         seperation = high_card-low_card
         if high_card == 12: # A
             seperation = min(seperation, low_card+1)
@@ -62,7 +76,7 @@ with open(input_file, mode='r', newline='') as file:
 
         id = get_id(high_card, low_card, modifier)
 
-        sql = f"INSERT INTO `2_player_holes` (`id`, `name`, `high_card`, `low_card`, `modifier`, `connection`, `win`, `lose`, `draw`) VALUES ({id}, '{hole_name}', {high_card}, {low_card}, '{modifier}', {connection}, {win_percent}, '{lose_percent}', '{draw_percent}');"
+        sql = f"INSERT INTO `{table_name}` (`id`, `name`, `high_card`, `low_card`, `modifier`, `connection`, `win`) VALUES ({id}, '{hole_name}', {high_card}, {low_card}, '{modifier}', {connection}, {win_percent});"
         # print(sql)
         cursor.execute(sql)
         mydb.commit()

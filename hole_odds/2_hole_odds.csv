@@ -1,3 +1,4 @@
+Cards,Win,Lose,Draw,Expected Value,Probability,Additive Probability
 Pair of A's,84.93,14.52,0.54,70.41,0.45,0.45
 Pair of K's,82.12,17.33,0.56,64.79,0.45,0.90
 Pair of Q's,79.63,19.78,0.59,59.85,0.45,1.36

@@ -12,7 +12,8 @@ mydb = mysql.connector.connect(
 cursor = mydb.cursor(buffered=True)
 
 # sql = "SELECT * FROM `2_player_holes`;"
-sql = "SELECT * FROM `2_player_holes` WHERE `modifier` LIKE 'u' AND `connection` < 4;"
+# sql = "SELECT * FROM `2_player_holes` WHERE `modifier` LIKE 'u' AND `connection` < 4;"
+sql = "SELECT * FROM `2_player_holes` WHERE `modifier` NOT LIKE 'p' AND `connection` < 4;"
 # sql = "SELECT * FROM `2_player_holes` WHERE `modifier` LIKE 'u';"
 
 cursor.execute(sql)
@@ -25,16 +26,17 @@ sliders_ranges = [
     ("percent_offsets", np.arange(0, 10, 0.5)),
     ("high_card_multipliers", np.arange(1, 2, 0.25)),
     ("low_card_multipliers",  np.arange(1, 2, 1)),
+    ("suited_adder",  np.arange(2.6, 2.61, 0.1)),
 ]
 
 
-high_card_adders = np.arange(0, 20, 1)
-low_card_adders = np.arange(0, 20, 1)
-percent_offsets = np.arange(0.0, 10.0, 0.5)
-high_card_multipliers = np.arange(1.0, 2.0, 0.25)
-low_card_multipliers =  np.arange(1.0, 2.0, 1.0)
+# high_card_adders = np.arange(0, 20, 1)
+# low_card_adders = np.arange(0, 20, 1)
+# percent_offsets = np.arange(0.0, 10.0, 0.5)
+# high_card_multipliers = np.arange(1.0, 2.0, 0.25)
+# low_card_multipliers =  np.arange(1.0, 2.0, 1.0)
 # pair_multiplier = 1.333333333
-# suited_adder = 2
+# suited_adder = 2.6
 # connection_adder = 0
 # connection_multiplier = 0
 
@@ -59,16 +61,23 @@ def estimate_hand(high_card, low_card, modifier, connection, sliders):
     percent_offset = sliders[2][1]
     high_card_multiplier = sliders[3][1]
     low_card_multiplier = sliders[4][1]
+    suited_adder = sliders[5][1]
 
     estimation = (high_card+high_card_adder)*high_card_multiplier
     estimation += (low_card+low_card_adder)*low_card_multiplier
 
-    # if modifier == 's':
-    #     estimation += suited_adder
+    if modifier == 's':
+        # if estimation > 55:
+        #     estimation += -0.5
+        # elif estimation < 45:
+        #     estimation += 0.5
+        estimation += suited_adder
     # elif modifier == 'p':
     #     estimation *= pair_multiplier
 
     # estimation += (connection+connection_adder) * connection_multiplier
+
+
 
     estimation += percent_offset
 
@@ -85,9 +94,9 @@ def calculate_error(sliders, print_rows=False):
     max_error = 0
 
     for row in table:
-        id, name, high_card, low_card, modifier, connection, win_percent, lose_percent, draw_percent = row
+        id, name, high_card, low_card, modifier, connection, win_percent = row
         estimate = estimate_hand(high_card, low_card, modifier, connection, sliders)
-        error = win_percent+draw_percent - estimate
+        error = win_percent - estimate
         total_error += error
         total_error_abs += abs(error)
         squared_error += error ** 2
@@ -163,6 +172,7 @@ calculate_error([
     ('percent_offsets', np.float64(9.5)),
     ('high_card_multipliers', np.float64(1.75)),
     ('low_card_multipliers', np.int64(1)),
+    ('suited_adder', np.float64(2.6)),
 ],print_rows=True)
 
 print()
