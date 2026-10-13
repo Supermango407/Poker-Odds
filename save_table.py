@@ -10,14 +10,14 @@ mydb = mysql.connector.connect(
 )
 cursor = mydb.cursor(buffered=True)
 
-table_name = "4_player_holes"
-input_file = "hole_odds/4_hole_odds.csv"
+table_name = "2_player_holes"
+input_file = "hole_odds/2_hole_odds.csv"
 row_numbers = {
     "name": 0,
     "win_percent": 1,
-    "draw_percent": None,
+    "draw_percent": 3,
 }
-high_card_second = False
+high_card_second = True
 
 
 def get_id(high_card, low_card, modifier):
@@ -59,11 +59,11 @@ with open(input_file, mode='r', newline='') as file:
             else:
                 modifier = 'u'
 
+        if high_card_second:
+            hole_name = hole_name[::-1]
+
         high_card = help.rank_values[hole_name[0]]
         low_card = help.rank_values[hole_name[1]]
-
-        if high_card_second:
-            low_card, high_card = high_card, low_card
 
         seperation = high_card-low_card
         if high_card == 12: # A

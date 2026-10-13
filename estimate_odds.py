@@ -17,22 +17,23 @@ sql = "SELECT * FROM `2_player_holes` WHERE `modifier` LIKE 'u' AND `connection`
 # sql = "SELECT * FROM `2_player_holes` WHERE `modifier` LIKE 'u';"
 
 cursor.execute(sql)
-table = cursor.fetchall()
+card_table = cursor.fetchall()
 
 
-sliders_ranges = [
-    ("high_card_adders", np.arange(0, 5, 1)),
-    ("low_card_adders", np.arange(15, 25, 1)),
-    ("percent_offsets", np.arange(10, 20, 1)),
-    ("high_card_multipliers", np.arange(1.5, 2, 0.25)),
-    ("low_card_multipliers",  np.arange(1, 2, 10)),
-    ("ace_adder",  np.arange(2.0, 5.0, 0.5)),
-    ("king_adder",  np.arange(2.0, 5.0, 0.5)),
-    ("queen_adder",  np.arange(2.0, 5.0, 0.5)),
-    # ("connection_adder",  np.arange(5, 8, 0.5)),
-    # ("connection_multiplier",  np.arange(0.0, 2.0, 0.5)),
-    # ("suited_adder",  np.arange(2.6, 2.61, 0.1)),
-]
+sliders_ranges = {
+    "high_card_adder": np.arange(0, 5, 1),
+    "low_card_adder": np.arange(15, 25, 1),
+    "percent_offset": np.arange(10, 20, 1),
+    "high_card_multiplier": np.arange(1, 5, 1),
+    "low_card_multiplier":  np.arange(1, 2, 10),
+    "ace_adder":  np.arange(0.0, 5.0, 0.5),
+    "king_adder":  np.arange(0.0, 5.0, 0.5),
+    "queen_adder":  np.arange(0.0, 5.0, 0.5),
+    # "connection_adder":  np.arange(5, 8, 0.5),
+    # "connection_multiplier":  np.arange(0.0, 2.0, 0.5),
+    # "suited_adder":  np.arange(2.6, 2.61, 0.1),
+}
+range_keys = list(sliders_ranges.keys())
 
 
 total_error = 0
@@ -51,17 +52,14 @@ paired_error_abs = 0
 
 
 def estimate_hand(high_card, low_card, modifier, connection, sliders):
-    high_card_adder = sliders[0][1]
-    low_card_adder = sliders[1][1]
-    percent_offset = sliders[2][1]
-    high_card_multiplier = sliders[3][1]
-    low_card_multiplier = sliders[4][1]
-    ace_adder = sliders[5][1]
-    king_adder = sliders[6][1]
-    queen_adder = sliders[7][1]
-    # connection_adder = sliders[7][1]
-    # connection_multiplier = sliders[8][1]
-    # suited_adder = sliders[9][1]
+    high_card_adder = sliders["high_card_adder"]
+    low_card_adder = sliders["low_card_adder"]
+    percent_offset = sliders["percent_offset"]
+    high_card_multiplier = sliders["high_card_multiplier"]
+    low_card_multiplier = sliders["low_card_multiplier"]
+    ace_adder = sliders["ace_adder"]
+    king_adder = sliders["king_adder"]
+    queen_adder = sliders["queen_adder"]
     
     estimation = percent_offset
     estimation += (high_card+high_card_adder)*high_card_multiplier
@@ -72,7 +70,7 @@ def estimate_hand(high_card, low_card, modifier, connection, sliders):
         estimation += ace_adder
     elif high_card == 11:
         estimation += king_adder
-    elif high_card == 1:
+    elif high_card == 10:
         estimation += queen_adder
 
     # if modifier == 's':
@@ -100,7 +98,7 @@ def calculate_error(sliders, print_rows=False, save=False):
     squared_error = 0
     max_error = 0
 
-    for row in table:
+    for row in card_table:
         id, name, high_card, low_card, modifier, connection, win_percent = row
         estimate = estimate_hand(high_card, low_card, modifier, connection, sliders)
         error = win_percent - estimate
@@ -125,53 +123,68 @@ def calculate_error(sliders, print_rows=False, save=False):
         print(f"max: {max_error:6.2f}")
 
 
-def calculate_best_estimate(ranges, sliders=[], current_best=math.inf, best_sliders=None, slider_index=0):
-    current_range = ranges[slider_index][1]
-    slider_name = ranges[slider_index][0]
+def calculate_best_estimate(ranges, sliders={}, current_best=math.inf, best_sliders=None, slider_index=0):
+    slider_name = range_keys[slider_index]
+    current_range = ranges[slider_name]
     last_slider = len(ranges) == slider_index+1
-    for i, current_slider in enumerate(current_range):
-        current_sliders = sliders+[(slider_name, current_slider)]
+    for i, slider_value in enumerate(current_range):
+        current_slider = sliders.copy()
+        current_slider[slider_name] = slider_value
+
         if slider_index == 0:
             print(f"{i}/{len(current_range)}")
         elif slider_index == 1:
             print(f"---{i}/{len(current_range)}")
 
         if last_slider:
-            calculate_error(current_sliders)
-            error = squared_error
+            calculate_error(current_slider)
+            error = total_error_abs
             if error < current_best:
                 current_best = error
-                best_sliders = current_sliders
+                best_sliders = current_slider
         else:
-            (current_best, best_sliders) = calculate_best_estimate(ranges, current_sliders, current_best, best_sliders, slider_index+1)
+            (current_best, best_sliders) = calculate_best_estimate(ranges, current_slider, current_best, best_sliders, slider_index+1)
 
     return (current_best, best_sliders)
 
 
-# error, sliders = calculate_best_estimate(sliders_ranges)
-# print()
-# print(error)
-# print()
-# for slider in sliders:
-#     print(f"{slider},")
-# print()
+def print_and_estimate():
+    print()
+    total = len(card_table)
+    print(f"cards: {len(card_table)}")
+    for slider_name in sliders_ranges:
+        slider_value = sliders_ranges[slider_name]
+        total *= len(slider_value)
+        print(f"{slider_name}: {len(slider_value)}")
+    print(f"total: {total:,}")
+    print()
+    
+    error, sliders = calculate_best_estimate(sliders_ranges)
+    print()
+    print(f"{error:.4f}")
+
+    print()
+    for slider_name in sliders:
+        slider_value = sliders[slider_name]
+        print(f'"{slider_name}": np.{slider_value.dtype}({slider_value}),')
+    print()
+
+    # return None
+
+    # calculate_error(sliders, print_rows=True, save=True)
 
 
-calculate_error([
-    ('high_card_adders', np.int64(2)),
-    ('low_card_adders', np.int64(15)),
-    ('percent_offsets', np.int64(12)),
-    ('high_card_multipliers', np.float64(1.75)),
-    ('low_card_multipliers', np.int64(1)),
-    ('ace_adder', np.float64(4.0)),
-    ('king_adder', np.float64(2.5)),
-    ('queen_adder', np.float64(2.0)),
-],print_rows=True, save=True)
+# print_and_estimate()
 
+calculate_error({
+    "high_card_adder": np.int64(0),
+    "low_card_adder": np.int64(15),
+    "percent_offset": np.int64(13),
+    "high_card_multiplier": np.int64(2),
+    "low_card_multiplier": np.int64(1),
+    "ace_adder": np.float64(3.5),
+    "king_adder": np.float64(2.5),
+    "queen_adder": np.float64(1.5),
+},print_rows=True, save=True)
 
-# total = 1
-# for slider in sliders_ranges:
-#     total *= len(slider[1])
-#     print(f"{slider[0]}: {len(slider[1])}")
-# print(total)
 
