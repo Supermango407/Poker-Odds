@@ -13,9 +13,9 @@ mydb = mysql.connector.connect(
 cursor = mydb.cursor(buffered=True)
 
 # sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `2_player_holes` WHERE `modifier` LIKE 'u' AND `connection` < 2;"
-sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `2_player_holes` WHERE `modifier` LIKE 'u';"
+# sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `2_player_holes` WHERE `modifier` LIKE 'u';"
 # sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `2_player_holes` WHERE `modifier` NOT LIKE 'p'"
-# sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `2_player_holes`;"
+sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `2_player_holes`;"
 
 cursor.execute(sql)
 card_table = cursor.fetchall()
@@ -37,18 +37,21 @@ card_table = cursor.fetchall()
 # }
 
 slider_steps = {
-    "percent_adder": (np.float64(28.00), 1),
-    "card_adder": (np.float64(0.00), 1),
+    "card_adder": (np.float64(2.00), 0),
+    "percent_adder": (np.float64(22.00), 1),
+    "pair_adder": (np.float64(27.00), 1),
+    "pair_scaler": (np.float64(1.50), 0.5),
     "high_card_scaler": (np.float64(1.00), 0),
     "low_card_scaler": (np.float64(0.00), 0),
-    "connection_scaler": (np.float64(0.00), 1),
+    "connection_scaler": (np.float64(0.00), 0.0),
+    "suited_adder": (np.float64(2.50), 0.5),
     "adjacent_adder_4": (np.float64(2.50), 0),
     "adjacent_adder_3": (np.float64(2.00), 0),
     "adjacent_adder_2": (np.float64(1.00), 0),
     "adjacent_adder_1": (np.float64(0.50), 0),
-    "ace_adder": (np.float64(1.50), 0),
-    "king_adder": (np.float64(1.00), 0),
-    "queen_adder": (np.float64(0.50), 0),
+    "ace_adder": (np.float64(1.50), 0.5),
+    "king_adder": (np.float64(1.00), 0.5),
+    "queen_adder": (np.float64(0.50), 0.5),
     "jack_adder": (np.float64(0.00), 0),
     "10_adder": (np.float64(0.00), 0),
 }
@@ -85,30 +88,34 @@ def get_rank_number(rank, sliders):
 
 
 def estimate_hand(high_card, low_card, modifier, connection, sliders):
-    percent_adder = sliders["percent_adder"]
     card_adder = sliders["card_adder"]
+    percent_adder = sliders["percent_adder"]
+    pair_adder = sliders["pair_adder"]
+    pair_multiplier = scaler_to_multiplier(sliders["pair_scaler"])
     high_card_multiplier = scaler_to_multiplier(sliders["high_card_scaler"])
     low_card_multiplier = scaler_to_multiplier(sliders["low_card_scaler"])
     connection_multiplier = scaler_to_multiplier(sliders["connection_scaler"])
     # adjacent_adder = sliders["adjacent_adder"]
-    # suited_adder = sliders["suited_adder"]
+    suited_adder = sliders["suited_adder"]
 
     estimation = percent_adder
-    
-    estimation += high_card_multiplier*(get_rank_number(high_card, sliders)+card_adder)
-    estimation += low_card_multiplier*(get_rank_number(low_card, sliders)+card_adder)
 
-    if connection > 0:
-        estimation += sliders[f"adjacent_adder_{connection}"]*connection_multiplier
+    if modifier == 'p':
+        estimation += pair_adder
+        estimation += pair_multiplier*(get_rank_number(high_card, sliders)+card_adder)
+    else:
+        estimation += high_card_multiplier*(get_rank_number(high_card, sliders)+card_adder)
+        estimation += low_card_multiplier*(get_rank_number(low_card, sliders)+card_adder)
 
-    # if modifier == 's':
-    #     if estimation > 55:
-    #         estimation += -0.5
-    #     elif estimation < 45:
-    #         estimation += 0.5
-        # estimation += suited_adder
-    # elif modifier == 'p':
-    #     estimation *= pair_multiplier
+        if connection > 0:
+            estimation += sliders[f"adjacent_adder_{connection}"]*connection_multiplier
+
+        if modifier == 's':
+            # if estimation > 55:
+            #     estimation += -0.5
+            # elif estimation < 45:
+            #     estimation += 0.5
+            estimation += suited_adder
 
     return estimation
 
@@ -257,11 +264,33 @@ def check_neighbors(slider_steps, save=False):
         calculate_error(best_sliders, save=save)
 
 
-check_neighbors(
-    slider_steps,
-    save=True
-)
+# check_neighbors(
+#     slider_steps,
+#     save=True
+# )
 
+
+sliders = {
+    "card_adder": np.float64(2.00),
+    "percent_adder": np.float64(22.00),
+    "pair_adder": np.float64(27.00),
+    "pair_scaler": np.float64(1.50),
+    "high_card_scaler": np.float64(1.00),
+    "low_card_scaler": np.float64(0.00),
+    "connection_scaler": np.float64(0.00),
+    "suited_adder": np.float64(2.50),
+    "adjacent_adder_4": np.float64(2.50),
+    "adjacent_adder_3": np.float64(2.00),
+    "adjacent_adder_2": np.float64(1.00),
+    "adjacent_adder_1": np.float64(0.50),
+    "ace_adder": np.float64(1.50),
+    "king_adder": np.float64(1.00),
+    "queen_adder": np.float64(0.50),
+    "jack_adder": np.float64(0.00),
+    "10_adder": np.float64(0.00),
+}
+
+print(estimate_hand(12, 9, 'u', 2, sliders))
 
 # calculate_error({
 #     "percent_adder": np.float64(23.00),
