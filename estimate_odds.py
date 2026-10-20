@@ -12,10 +12,10 @@ mydb = mysql.connector.connect(
 )
 cursor = mydb.cursor(buffered=True)
 
-# sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `2_player_holes` WHERE `modifier` LIKE 'u' AND `connection` < 2;"
-# sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `2_player_holes` WHERE `modifier` LIKE 'u';"
-# sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `2_player_holes` WHERE `modifier` NOT LIKE 'p'"
-sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `2_player_holes`;"
+# sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `02_player_holes` WHERE `modifier` LIKE 'u' AND `connection` < 2;"
+# sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `02_player_holes` WHERE `modifier` LIKE 'u';"
+# sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `02_player_holes` WHERE `modifier` NOT LIKE 'p'"
+sql = "SELECT `id`,`name`,`high_card`,`low_card`,`modifier`,`connection`,`win` FROM `02_player_holes`;"
 
 cursor.execute(sql)
 card_table = cursor.fetchall()
@@ -124,7 +124,7 @@ def calculate_error(sliders, print_rows=False, save=False, min_error=math.inf):
     global total_error, total_error_abs, squared_error, max_error
 
     if save:
-        cursor.execute("TRUNCATE `2_player_estimate`")
+        cursor.execute("TRUNCATE `02_player_estimate`")
         mydb.commit()
 
     # Reset error values
@@ -152,7 +152,7 @@ def calculate_error(sliders, print_rows=False, save=False, min_error=math.inf):
         if print_rows:
             print(f"{name} {modifier}: {error:5.2f}, {error*error:5.2f}")
         if save:
-            sql = f"INSERT INTO `2_player_estimate` (`id`, `name`, `high_card`, `low_card`, `modifier`, `connection`, `win`, `estimate`, `abs_error`, `error`) VALUES ({id}, '{name}', {high_card}, {low_card}, '{modifier}', {connection}, {win_percent:5.2f}, {estimate:5.2f}, {abs(error):5.2f}, {error:5.2f});"
+            sql = f"INSERT INTO `02_player_estimate` (`id`, `name`, `high_card`, `low_card`, `modifier`, `connection`, `win`, `estimate`, `abs_error`, `error`) VALUES ({id}, '{name}', {high_card}, {low_card}, '{modifier}', {connection}, {win_percent:5.2f}, {estimate:5.2f}, {abs(error):5.2f}, {error:5.2f});"
             cursor.execute(sql)
             mydb.commit()
 

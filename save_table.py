@@ -10,14 +10,14 @@ mydb = mysql.connector.connect(
 )
 cursor = mydb.cursor(buffered=True)
 
-table_name = "2_player_holes"
-input_file = "hole_odds/2_hole_odds.csv"
+table_name = "10_player_holes"
+input_file = "hole_odds/10_hole_odds.csv"
 row_numbers = {
     "name": 0,
     "win_percent": 1,
-    "draw_percent": 3,
+    "draw_percent": None,
 }
-high_card_second = True
+high_card_second = False
 
 
 def get_id(high_card, low_card, modifier):

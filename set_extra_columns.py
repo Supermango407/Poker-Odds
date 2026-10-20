@@ -2,7 +2,7 @@ import help
 import mysql.connector
 import csv
 
-table_name = "4_player_holes"
+table_name = "10_player_holes"
 
 mydb = mysql.connector.connect(
     host="localhost",

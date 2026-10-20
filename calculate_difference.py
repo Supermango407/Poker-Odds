@@ -12,11 +12,11 @@ mydb = mysql.connector.connect(
 )
 cursor = mydb.cursor(buffered=True)
 
-sql = "SELECT * FROM `2_player_holes` WHERE `modifier` LIKE 'u' ORDER BY `lose` DESC;"
+sql = "SELECT * FROM `02_player_holes` WHERE `modifier` LIKE 'u' ORDER BY `lose` DESC;"
 cursor.execute(sql)
 unsuited_hands = cursor.fetchall()
 
-sql = "SELECT * FROM `2_player_holes` WHERE `modifier` LIKE 's' ORDER BY `lose` DESC;"
+sql = "SELECT * FROM `02_player_holes` WHERE `modifier` LIKE 's' ORDER BY `lose` DESC;"
 cursor.execute(sql)
 suited_hands = cursor.fetchall()
 
